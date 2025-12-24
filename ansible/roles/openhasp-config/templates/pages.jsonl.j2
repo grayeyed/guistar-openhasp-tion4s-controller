@@ -1,0 +1,34 @@
+{"page":1,"id":0,"bg_color":"#00d3ed","bg_grad_color":"#006495","bg_grad_dir":2}
+{"page":0,"id":0,"bg_color":"#00d3ed","bg_grad_color":"#006495","bg_grad_dir":2}
+{% if homeassistant.temperature_sensor %}
+{"page":0,"id":1,"obj":"label","x":10,"y":10,"w":220,"h":24,"text":"--°C","text_font":18,"text_color":"#FFFFFF","align":"left","bg_opa":0,"border_side":0,"click":false}
+{% endif %}
+{% if homeassistant.humidity_sensor %}
+{"page":0,"id":2,"obj":"label","x":10,"y":34,"w":220,"h":24,"text":"--%","text_font":18,"text_color":"#FFFFFF","align":"left","bg_opa":0,"border_side":0,"click":false}
+{% endif %}
+{% if homeassistant.co2_sensor %}
+{"page":0,"id":3,"obj":"label","x":10,"y":58,"w":220,"h":24,"text":"-- ppm","text_font":18,"text_color":"#FFFFFF","align":"left","bg_opa":0,"border_side":0,"click":false}
+{% endif %}
+{% if homeassistant.productivity_sensor %}
+{"page":0,"id":4,"obj":"label","x":250,"y":10,"w":220,"h":24,"text":"-- m³/h","text_font":18,"text_color":"#FFFFFF","align":"right","bg_opa":0,"border_side":0,"click":false}
+{% endif %}
+{% if homeassistant.filter_time_sensor %}
+{"page":0,"id":5,"obj":"label","x":250,"y":58,"w":220,"h":24,"text":"-- d","text_font":18,"text_color":"#FFFFFF","align":"right","bg_opa":0,"border_side":0,"click":false}
+{% endif %}
+{% if homeassistant.heater_power_sensor %}
+{"page":0,"id":6,"obj":"label","x":250,"y":34,"w":220,"h":24,"text":"-- W","text_font":18,"text_color":"#FFFFFF","align":"right","bg_opa":0,"border_side":0,"click":false}
+{% endif %}
+{% if homeassistant.climate_entity %}
+{"page":1,"id":10,"obj":"arc","x":115,"y":30,"w":250,"h":250,"min":1,"max":30,"val":11,"adjustable":true,"rotation":0,"type":0,"start_angle":135,"end_angle":45,"start_angle1":135,"end_angle1":45,"border_side":0,"line_color10":"#ff0000"}
+{"page":1,"id":11,"obj":"label","parentid":10,"x":0,"y":70,"w":250,"h":60,"text":"--°C","align":"center","text_font":52,"text_color":"#FFFFFF","bg_opa":0,"border_side":0,"click":false}
+{"page":1,"id":12,"obj":"label","parentid":10,"x":0,"y":135,"w":250,"h":40,"text":"","align":"center","text_font":28,"text_color":"#FFFFFF","bg_opa":0,"border_side":0,"click":false}
+{"page":1,"id":21,"obj":"label","x":40,"y":270,"w":300,"h":24,"text":"Fan speed: --","text_font":18,"text_color":"#FFFFFF","align":"left","bg_opa":0,"border_side":0,"click":false}
+{"page":1,"id":22,"obj":"label","x":40,"y":300,"w":35,"h":35,"text":"\uE210","text_font":23,"text_color":"#FFFFFF","align":"left","bg_opa":0,"border_side":0,"click":false}
+{"page":1,"id":20,"obj":"slider","x":90,"y":300,"w":290,"h":30,"min":1,"max":6,"val":1}
+{"page":1,"id":23,"obj":"label","x":390,"y":290,"w":45,"h":45,"text":"\uE210","text_font":45,"text_color":"#FFFFFF","align":"left","bg_opa":0,"border_side":0,"click":false}
+{"page":1,"id":30,"obj":"btnmatrix","x":20,"y":345,"w":300,"h":120,"options":["\uE425","\uE238","\uE210"],"toggle":1,"one_check":1,"val":0,"text_font":48}
+{% endif %}
+{% if homeassistant.boost_switch %}
+{"page":1,"id":40,"obj":"btn","x":355,"y":360,"w":90,"h":90,"toggle":0,"bg_color":"#E1A684","bg_grad_color": "#8D665C", "bg_grad_dir": 1, "border_width":2, "radius":90,"text":"T","text_font":35,"text_color":"#FFFFFF","align":"center"}
+{"page":1,"id":41,"obj":"arc","x":340,"y":345,"w":120,"h":120,"min":0,"max":600,"val":0,"adjustable":false,"rotation":0,"type":0,"start_angle":0,"end_angle":360,"border_side":0,"line_color10":"#FFFFFF","hidden":true, "opa": 255}
+{% endif %}

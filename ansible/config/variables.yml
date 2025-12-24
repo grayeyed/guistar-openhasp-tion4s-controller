@@ -1,0 +1,16 @@
+# Параметры устройства
+device:
+  name: "plate04"
+
+# Home Assistant сущности (все опциональны)
+homeassistant:
+  climate_entity: "climate.tion_4s_livingroom_tion_4s_livingroom"
+  temperature_sensor: "sensor.temperature"
+  humidity_sensor: "sensor.humidity"
+  co2_sensor: "sensor.carbon_dioxide"
+  productivity_sensor: "sensor.tion_4s_livingroom_productivity"
+  filter_time_sensor: "sensor.tion_4s_livingroom_filter_time_left"
+  heater_power_sensor: "sensor.tion_4s_livingroom_heater_power"
+  boost_switch: "switch.tion_4s_livingroom_boost"
+  boost_time_sensor: "sensor.tion_4s_livingroom_boost_time_left"
+  boost_time_number: "number.tion_4s_livingroom_boost_time"

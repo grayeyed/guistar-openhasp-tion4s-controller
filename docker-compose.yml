@@ -1,0 +1,10 @@
+services:
+  openhasp-config:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ./ansible/config:/app/ansible/config:ro
+      - ./output:/app/output
+    environment:
+      - ANSIBLE_HOST_KEY_CHECKING=False

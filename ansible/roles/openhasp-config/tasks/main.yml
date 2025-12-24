@@ -1,0 +1,23 @@
+---
+- name: Create output directory
+  file:
+    path: "{{ output_dir | default('/tmp/openhasp') }}"
+    state: directory
+    mode: '0755'
+
+- name: Generate openhasp_homeassistant.yaml
+  template:
+    src: openhasp_homeassistant.yaml.j2
+    dest: "{{ output_dir | default('/tmp/openhasp') }}/openhasp_homeassistant.yaml"
+    mode: '0644'
+  when: homeassistant.climate_entity is defined and homeassistant.climate_entity != ""
+
+- name: Generate pages.jsonl
+  template:
+    src: pages.jsonl.j2
+    dest: "{{ output_dir | default('/tmp/openhasp') }}/pages.jsonl"
+    mode: '0644'
+
+- name: Display generated files
+  debug:
+    msg: "Конфигурационные файлы сгенерированы в {{ output_dir | default('/tmp/openhasp') }}/"
