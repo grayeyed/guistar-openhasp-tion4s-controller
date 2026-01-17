@@ -1,6 +1,6 @@
 # ESP32-S3 OpenHASP Tion 4S Controller
 
-Ansible playbook для конфигурирования тач-скрин устройства ESP32-S3 с прошивкой OpenHASP для управления бризером Tion 4S и другими устройствами через Home Assistant.
+Ansible playbook для конфигурирования тач-скрин устройства ESP32-S3, например, [GUISTAR ESP32-S3 с тремя релейными выходами](https://aliexpress.ru/item/1005006302251538.html?utm_campaign=1954_70513&utm_content=2&utm_medium=cpa&utm_source=aerkol&sku_id=12000039682095645) с прошивкой OpenHASP для управления бризером Tion 4S и другими устройствами через Home Assistant.
 
 ## Основные возможности
 - **Мульти-устройство**: Управление неограниченным количеством панелей OpenHASP.
