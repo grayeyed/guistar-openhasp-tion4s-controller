@@ -1,23 +1,46 @@
 ---
 - name: Create output directory
   file:
-    path: "{{ output_dir | default('/tmp/openhasp') }}"
+    path: "{{ generated_configs_path }}"
     state: directory
-    mode: '0755'
+    mode: '0777'
+  tags: [generate, upload]
 
 - name: Generate openhasp_homeassistant.yaml
   template:
     src: openhasp_homeassistant.yaml.j2
-    dest: "{{ output_dir | default('/tmp/openhasp') }}/openhasp_homeassistant.yaml"
-    mode: '0644'
+    dest: "{{ generated_configs_path }}/{{ device.name }}/{{ device.name }}_openhasp_homeassistant.yaml"
+    mode: '0666'
   when: homeassistant.climate_entity is defined and homeassistant.climate_entity != ""
+  tags: [generate, upload]
 
 - name: Generate pages.jsonl
   template:
     src: pages.jsonl.j2
-    dest: "{{ output_dir | default('/tmp/openhasp') }}/pages.jsonl"
-    mode: '0644'
+    dest: "{{ generated_configs_path }}/{{ device.name }}/pages.jsonl"
+    mode: '0666'
+  tags: [generate, upload]
 
-- name: Display generated files
-  debug:
-    msg: "Конфигурационные файлы сгенерированы в {{ output_dir | default('/tmp/openhasp') }}/"
+- name: Upload pages.jsonl to device
+  ansible.builtin.uri:
+    url: "http://{{ device.ip }}/edit"
+    method: POST
+    body_format: form-multipart
+    body:
+      data:
+        content: "{{ lookup('file', generated_configs_path + '/' + device.name + '/pages.jsonl') }}"
+        filename: "pages.jsonl"
+  # Explicitly specify localhost so the request comes from the control node,
+  # even if ansible_connection for the host is changed.
+  delegate_to: localhost
+  when: device.ip is defined and device.ip != ""
+  tags: upload
+
+- name: Reboot device to apply changes
+  ansible.builtin.uri:
+    url: "http://{{ device.ip }}/reboot"
+    method: POST
+  delegate_to: localhost
+  when: device.ip is defined and device.ip != ""
+  tags: upload
+  ignore_errors: true

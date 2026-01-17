@@ -1,0 +1,65 @@
+# =============================================================================
+# Example variables for OpenHASP device (plate01)
+# =============================================================================
+# Copy this file to plate01.yml (or another name from inventory)
+# and configure for your needs.
+# =============================================================================
+
+device:
+   name: "plate01"           # Device name (must match filename without .yml)
+   ip: "192.168.1.100"       # Device IP address for configuration upload
+
+# =============================================================================
+# Home Assistant entities for display on the panel
+# =============================================================================
+homeassistant:
+   # Required climate entity (Tion 4S)
+   climate_entity: "climate.tion_4s_bedroom"
+
+  # Left upper corner (top to bottom)
+  leftcorner_line_one:
+    sensor: "sensor.bedroom_temperature"
+    unit: "°C"
+    enabled: true
+  leftcorner_line_two:
+    sensor: "sensor.bedroom_humidity"
+    unit: "%"
+    enabled: true
+  leftcorner_line_three:
+    sensor: "sensor.bedroom_co2"
+    unit: "ppm"
+    enabled: true
+
+  # Right upper corner (top to bottom)
+  rightcorner_line_one:
+    sensor: "sensor.tion_4s_bedroom_productivity"
+    unit: "m³/h"
+    enabled: true
+  rightcorner_line_two:
+    sensor: "sensor.tion_4s_bedroom_heater_power"
+    unit: "W"
+    enabled: true
+  rightcorner_line_three:
+    sensor: "sensor.tion_4s_bedroom_filter_time_left"
+    unit: "d"
+    enabled: true
+
+  # Boost settings (optional)
+  boost_enabled: true
+  boost_switch: "switch.tion_4s_bedroom_boost"
+  boost_time_sensor: "sensor.tion_4s_bedroom_boost_time_left"
+  boost_time_number: "number.tion_4s_bedroom_boost_time"
+  boost_max_time: 60
+
+  # Relay settings (optional)
+  # If section is defined, relay control page will be created (Page 2)
+  relays:
+    - name: "Relay 1"
+      pin: 40
+      group: 1
+    - name: "Relay 2"
+      pin: 2
+      group: 2
+    - name: "Relay 3"
+      pin: 1
+      group: 3

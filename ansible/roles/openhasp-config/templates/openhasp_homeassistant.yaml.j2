@@ -1,143 +1,186 @@
-openhasp:
-  {{ device.name | default('plate01') }}:
-    objects:
-      # Page 0 (global): 3 labels left (temp/humidity/co2) + 3 labels right (productivity/filter/heater power)
-{% if homeassistant.temperature_sensor %}
-      - obj: "p0b1"
-        properties:
-          "text": '{{ "{{" }} states("{{ homeassistant.temperature_sensor }}") {{ "}}" }}°C'
+objects:
+  # Page 0 (global): Left corner labels
+{% if homeassistant.leftcorner_line_one is defined and homeassistant.leftcorner_line_one.sensor %}
+  - obj: "p0b1"
+    properties:
+      "text": '{{ "{{" }} states("{{ homeassistant.leftcorner_line_one.sensor }}") {{ "}}" }}{% if homeassistant.leftcorner_line_one.unit not in ["°C","%"] %} {% endif %}{{ homeassistant.leftcorner_line_one.unit }}'
 {% endif %}
-{% if homeassistant.humidity_sensor %}
-      - obj: "p0b2"
-        properties:
-          "text": '{{ "{{" }} states("{{ homeassistant.humidity_sensor }}") {{ "}}" }}%'
+{% if homeassistant.leftcorner_line_two is defined and homeassistant.leftcorner_line_two.sensor %}
+  - obj: "p0b2"
+    properties:
+      "text": '{{ "{{" }} states("{{ homeassistant.leftcorner_line_two.sensor }}") {{ "}}" }}{% if homeassistant.leftcorner_line_two.unit not in ["°C","%"] %} {% endif %}{{ homeassistant.leftcorner_line_two.unit }}'
 {% endif %}
-{% if homeassistant.co2_sensor %}
-      - obj: "p0b3"
-        properties:
-          "text": '{{ "{{" }} states("{{ homeassistant.co2_sensor }}") {{ "}}" }} ppm'
-{% endif %}
-{% if homeassistant.productivity_sensor %}
-      - obj: "p0b4"
-        properties:
-          "text": '{{ "{{" }} states("{{ homeassistant.productivity_sensor }}") {{ "}}" }} m³/h'
-{% endif %}
-{% if homeassistant.filter_time_sensor %}
-      - obj: "p0b5"
-        properties:
-          "text": '{{ "{{" }} states("{{ homeassistant.filter_time_sensor }}") {{ "}}" }} d'
-{% endif %}
-{% if homeassistant.heater_power_sensor %}
-      - obj: "p0b6"
-        properties:
-          "text": '{{ "{{" }} states("{{ homeassistant.heater_power_sensor }}") {{ "}}" }} W'
+{% if homeassistant.leftcorner_line_three is defined and homeassistant.leftcorner_line_three.sensor %}
+  - obj: "p0b3"
+    properties:
+      "text": '{{ "{{" }} states("{{ homeassistant.leftcorner_line_three.sensor }}") {{ "}}" }}{% if homeassistant.leftcorner_line_three.unit not in ["°C","%"] %} {% endif %}{{ homeassistant.leftcorner_line_three.unit }}'
 {% endif %}
 
-      # Page 1: Temperature arc + two labels inside (setpoint + hvac_action)
-{% if homeassistant.climate_entity %}
-      - obj: "p1b11" # setpoint temperature
-        properties:
-          "text": '{{ "{{" }} state_attr("{{ homeassistant.climate_entity }}", "temperature") {{ "}}" }}°C'
-
-      - obj: "p1b12" # hvac_action
-        properties:
-          "text": >
-            {% set entity = homeassistant.climate_entity -%}
-            {{ "{%" }} set a = state_attr('{{ entity }}','hvac_action') {{ "%}" }}
-            {{ "{{" }} a if a is not none else '' {{ "}}" }}
-          "text_color": >
-            {% set entity = homeassistant.climate_entity -%}
-            {{ "{%" }} set a = state_attr('{{ entity }}','hvac_action') {{ "%}" }}
-            {{ "{%" }} if a == 'fan' {{ "%}" }}#0066ff{{ "{%" }} elif a == 'heating' {{ "%}" }}#ff0000{{ "{%" }} else {{ "%}" }}#ffffff{{ "{%" }} endif {{ "%}" }}
-
-      - obj: "p1b10" # arc (setpoint temperature)
-        properties:
-          "val": '{{ "{{" }} state_attr("{{ homeassistant.climate_entity }}", "temperature") | int(1) {{ "}}" }}'
-          "enabled": '{{ "{{" }} 1 if states("{{ homeassistant.climate_entity }}") in ["heat","fan_only"] else 0 {{ "}}" }}'
-          "line_color10": >
-            {% set entity = homeassistant.climate_entity -%}
-            {{ "{%" }} set m = states('{{ entity }}') {{ "%}" }}
-            {{ "{%" }} if m == 'heat' {{ "%}" }}#ff0000{{ "{%" }} elif m == 'fan_only' {{ "%}" }}#0066ff{{ "{%" }} else {{ "%}" }}#888888{{ "{%" }} endif {{ "%}" }}
-        event:
-          "changed":
-            - service: climate.set_temperature
-              data:
-                entity_id: {{ homeassistant.climate_entity }}
-                temperature: "{{ "{{" }} val {{ "}}" }}"
-          "up":
-            - service: climate.set_temperature
-              data:
-                entity_id: {{ homeassistant.climate_entity }}
-                temperature: "{{ "{{" }} val {{ "}}" }}"
-
-      # Fan speed slider (1..6)
-      - obj: "p1b21" # fan speed label
-        properties:
-          "text": 'Fan speed: {{ "{{" }} state_attr("{{ homeassistant.climate_entity }}", "fan_mode") {{ "}}" }}'
-
-      - obj: "p1b20"
-        properties:
-          "val": '{{ "{{" }} state_attr("{{ homeassistant.climate_entity }}", "fan_mode") | int(1) {{ "}}" }}'
-        event:
-          "changed":
-            - service: climate.set_fan_mode
-              data:
-                entity_id: {{ homeassistant.climate_entity }}
-                fan_mode: "{{ "{{" }} val | string {{ "}}" }}"
-          "up":
-            - service: climate.set_fan_mode
-              data:
-                entity_id: {{ homeassistant.climate_entity }}
-                fan_mode: "{{ "{{" }} val | string {{ "}}" }}"
-
-      # HVAC mode btnmatrix (off, heat, fan_only)
-      - obj: "p1b30"
-        properties:
-          "val": >
-            {% set entity = homeassistant.climate_entity -%}
-            {{ "{%" }} set m = states('{{ entity }}') {{ "%}" }}
-            {{ "{%" }} if m == 'off' {{ "%}" }}0{{ "{%" }} elif m == 'heat' {{ "%}" }}1{{ "{%" }} elif m == 'fan_only' {{ "%}" }}2{{ "{%" }} else {{ "%}" }}0{{ "{%" }} endif {{ "%}" }}
-        event:
-          "changed":
-            - service: climate.set_hvac_mode
-              data:
-                entity_id: {{ homeassistant.climate_entity }}
-                hvac_mode: >
-                  {{ "{%" }} set modes = ['off','heat','fan_only'] {{ "%}" }}
-                  {{ "{{" }} modes[val] if val is not none and (0 <= val < (modes|length)) else 'off' {{ "}}" }}
+  # Page 0 (global): Right corner labels
+{% if homeassistant.rightcorner_line_one is defined and homeassistant.rightcorner_line_one.sensor %}
+  - obj: "p0b4"
+    properties:
+      "text": '{{ "{{" }} states("{{ homeassistant.rightcorner_line_one.sensor }}") {{ "}}" }}{% if homeassistant.rightcorner_line_one.unit not in ["°C","%"] %} {% endif %}{{ homeassistant.rightcorner_line_one.unit }}'
+{% endif %}
+{% if homeassistant.rightcorner_line_two is defined and homeassistant.rightcorner_line_two.sensor %}
+  - obj: "p0b6"
+    properties:
+      "text": '{{ "{{" }} states("{{ homeassistant.rightcorner_line_two.sensor }}") {{ "}}" }}{% if homeassistant.rightcorner_line_two.unit not in ["°C","%"] %} {% endif %}{{ homeassistant.rightcorner_line_two.unit }}'
+{% endif %}
+{% if homeassistant.rightcorner_line_three is defined and homeassistant.rightcorner_line_three.sensor %}
+  - obj: "p0b5"
+    properties:
+      "text": '{{ "{{" }} states("{{ homeassistant.rightcorner_line_three.sensor }}") {{ "}}" }}{% if homeassistant.rightcorner_line_three.unit not in ["°C","%"] %} {% endif %}{{ homeassistant.rightcorner_line_three.unit }}'
 {% endif %}
 
-      # BOOST toggle button + child arc (time left)
-{% if homeassistant.boost_switch %}
-      - obj: "p1b40" # BOOST button (toggle)
-        properties:
-          "bg_color": "{{ "{{" }} '#0066ff' if is_state('{{ homeassistant.boost_switch }}','on') else '#7fd7ff' {{ "}}" }}"
-          "text": >
-            {% set switch = homeassistant.boost_switch -%}
-            {% set sensor = homeassistant.boost_time_sensor -%}
-            {{ "{%" }} set off = is_state('{{ switch }}','off') {{ "%}" }}
-            {{ "{%" }} set s = states('{{ sensor }}')|int(0) {{ "%}" }}
-            {{ "{%" }} if off {{ "%}" }}
-              Т
-            {{ "{%" }} else {{ "%}" }}
-              {{ "{%" }} if s >= 60 {{ "%}" }}
-                {{ "{%" }} set m = (s // 60) | int(0) {{ "%}" }}
-                {{ "{{" }} m {{ "}}" }}m
-              {{ "{%" }} else {{ "%}" }}
-                {{ "{%" }} set sec = (s % 60) | int(0) {{ "%}" }}
-                < 1m
-              {{ "{%" }} endif {{ "%}" }}
-            {{ "{%" }} endif {{ "%}" }}
-        event:
-          "up":
-            - service: switch.toggle
-              data:
-                entity_id: {{ homeassistant.boost_switch }}
+  # Page 0: Global Navigation
+{% if homeassistant.relays is defined and homeassistant.relays %}
+  - obj: "p0b10" # Climate Tab
+    properties:
+      "bg_color": '{{ "{{" }} "#ff9e00" if is_state("openhasp.{{ device.name }}", "1") else "#006495" {{ "}}" }}'
+    event:
+      "down":
+        - service: openhasp.change_page
+          target:
+            entity_id: openhasp.{{ device.name }}
+          data:
+            page_number: 1
+  - obj: "p0b11" # Relays Tab
+    properties:
+      "bg_color": '{{ "{{" }} "#ff9e00" if is_state("openhasp.{{ device.name }}", "2") else "#006495" {{ "}}" }}'
+    event:
+      "down":
+        - service: openhasp.change_page
+          target:
+            entity_id: openhasp.{{ device.name }}
+          data:
+            page_number: 2
+{% endif %}
 
-      - obj: "p1b41" # BOOST child arc (seconds left)
-        properties:
-          "min": 0
-          "max": "{{ "{{" }} (states('{{ homeassistant.boost_time_number }}')|float(0) * 60) | int(0) {{ "}}" }}"
-          "val": "{{ "{{" }} states('{{ homeassistant.boost_time_sensor }}')|int(0) {{ "}}" }}"
-          "hidden": "{{ "{{" }} 0 if is_state('{{ homeassistant.boost_switch }}','on') and (states('{{ homeassistant.boost_time_sensor }}')|int(0) > 0) else 1 {{ "}}" }}"
+  # Page 1: Temperature arc + two labels inside (setpoint + hvac_action)
+{% if homeassistant.climate_entity is defined and homeassistant.climate_entity %}
+  - obj: "p1b11" # setpoint temperature
+    properties:
+      "text": '{{ "{{" }} state_attr("{{ homeassistant.climate_entity }}", "temperature") {{ "}}" }}°C'
+
+  - obj: "p1b12" # hvac_action
+    properties:
+      "text": >
+        {% set entity = homeassistant.climate_entity -%}
+        {{ "{%" }} set a = state_attr('{{ entity }}','hvac_action') {{ "%}" }}
+        {{ "{{" }} a if a is not none else '' {{ "}}" }}
+      "text_color": >
+        {% set entity = homeassistant.climate_entity -%}
+        {{ "{%" }} set a = state_attr('{{ entity }}','hvac_action') {{ "%}" }}
+        {{ "{%" }} if a == 'fan' {{ "%}" }}#0066ff{{ "{%" }} elif a == 'heating' {{ "%}" }}#ff0000{{ "{%" }} else {{ "%}" }}#ffffff{{ "{%" }} endif {{ "%}" }}
+
+  - obj: "p1b10" # arc (setpoint temperature)
+    properties:
+      "val": '{{ "{{" }} state_attr("{{ homeassistant.climate_entity }}", "temperature") | int(1) {{ "}}" }}'
+      "enabled": '{{ "{{" }} 1 if states("{{ homeassistant.climate_entity }}") in ["heat","fan_only"] else 0 {{ "}}" }}'
+      "line_color10": >
+        {% set entity = homeassistant.climate_entity -%}
+        {{ "{%" }} set m = states('{{ entity }}') {{ "%}" }}
+        {{ "{%" }} if m == 'heat' {{ "%}" }}#ff0000{{ "{%" }} elif m == 'fan_only' {{ "%}" }}#0066ff{{ "{%" }} else {{ "%}" }}#888888{{ "{%" }} endif {{ "%}" }}
+    event:
+      "changed":
+        - service: climate.set_temperature
+          data:
+            entity_id: {{ homeassistant.climate_entity }}
+            temperature: "{{ "{{" }} val {{ "}}" }}"
+      "up":
+        - service: climate.set_temperature
+          data:
+            entity_id: {{ homeassistant.climate_entity }}
+            temperature: "{{ "{{" }} val {{ "}}" }}"
+
+  # Fan speed slider (1..6)
+  - obj: "p1b21" # fan speed label
+    properties:
+      "text": 'Fan speed: {{ "{{" }} state_attr("{{ homeassistant.climate_entity }}", "fan_mode") {{ "}}" }}'
+
+  - obj: "p1b20"
+    properties:
+      "val": '{{ "{{" }} state_attr("{{ homeassistant.climate_entity }}", "fan_mode") | int(1) {{ "}}" }}'
+    event:
+      "changed":
+        - service: climate.set_fan_mode
+          data:
+            entity_id: {{ homeassistant.climate_entity }}
+            fan_mode: "{{ "{{" }} val | string {{ "}}" }}"
+      "up":
+        - service: climate.set_fan_mode
+          data:
+            entity_id: {{ homeassistant.climate_entity }}
+            fan_mode: "{{ "{{" }} val | string {{ "}}" }}"
+
+  # HVAC mode btnmatrix (off, heat, fan_only)
+  - obj: "p1b30"
+    properties:
+      "val": >
+        {% set entity = homeassistant.climate_entity -%}
+        {{ "{%" }} set m = states('{{ entity }}') {{ "%}" }}
+        {{ "{%" }} if m == 'off' {{ "%}" }}0{{ "{%" }} elif m == 'heat' {{ "%}" }}1{{ "{%" }} elif m == 'fan_only' {{ "%}" }}2{{ "{%" }} else {{ "%}" }}0{{ "{%" }} endif {{ "%}" }}
+    event:
+      "changed":
+        - service: climate.set_hvac_mode
+          data:
+            entity_id: {{ homeassistant.climate_entity }}
+            hvac_mode: >
+              {{ "{%" }} set modes = ['off','heat','fan_only'] {{ "%}" }}
+              {{ "{{" }} modes[val] if val is not none and (0 <= val < (modes|length)) else 'off' {{ "}}" }}
+{% endif %}
+
+  # BOOST toggle button + child arc (time left)
+{% if homeassistant.boost_switch is defined and homeassistant.boost_switch %}
+  - obj: "p1b40" # BOOST button (toggle)
+    properties:
+      "bg_color": "{{ "{{" }} '#0066ff' if is_state('{{ homeassistant.boost_switch }}','on') else '#7fd7ff' {{ "}}" }}"
+      "text": >
+        {% set switch = homeassistant.boost_switch -%}
+        {% set sensor = homeassistant.boost_time_sensor -%}
+        {{ "{%" }} set off = is_state('{{ switch }}','off') {{ "%}" }}
+        {{ "{%" }} set s = states('{{ sensor }}')|int(0) {{ "%}" }}
+        {{ "{%" }} if off {{ "%}" }}
+          T
+        {{ "{%" }} else {{ "%}" }}
+          {{ "{%" }} if s >= 60 {{ "%}" }}
+            {{ "{%" }} set m = (s // 60) | int(0) {{ "%}" }}
+            {{ "{{" }} m {{ "}}" }}m
+          {{ "{%" }} else {{ "%}" }}
+            {{ "{%" }} set sec = (s % 60) | int(0) {{ "%}" }}
+            < 1m
+          {{ "{%" }} endif {{ "%}" }}
+        {{ "{%" }} endif {{ "%}" }}
+    event:
+      "up":
+        - service: switch.toggle
+          data:
+            entity_id: {{ homeassistant.boost_switch }}
+
+  - obj: "p1b41" # BOOST child arc (seconds left)
+    properties:
+      "min": 0
+      "max": "{{ "{{" }} (states('{{ homeassistant.boost_time_number }}')|float(0) * 60) | int(0) {{ "}}" }}"
+      "val": "{{ "{{" }} states('{{ homeassistant.boost_time_sensor }}')|int(0) {{ "}}" }}"
+      "hidden": "{{ "{{" }} 0 if is_state('{{ homeassistant.boost_switch }}','on') and (states('{{ homeassistant.boost_time_sensor }}')|int(0) > 0) else 1 {{ "}}" }}"
+{% endif %}
+
+  # Page 2: Relays
+{% if homeassistant.relays is defined and homeassistant.relays %}
+{% for relay in homeassistant.relays %}
+  - obj: "p2b{{ 10 + loop.index }}"
+    properties:
+      "text": '{{ "{{" }} "\uE6E8" if is_state("openhasp.{{ device.name }}_p2b{{ 10 + loop.index }}", "on") else "\uE335" {{ "}}" }}'
+      "bg_color": '{{ "{{" }} "#0066ff" if is_state("openhasp.{{ device.name }}_p2b{{ 10 + loop.index }}", "on") else "#2C3E50" {{ "}}" }}'
+      "border_width": '{{ "{{" }} 4 if is_state("openhasp.{{ device.name }}_p2b{{ 10 + loop.index }}", "on") else 0 {{ "}}" }}'
+      "border_color": "#FFFFFF"
+    event:
+      "changed":
+        - service: openhasp.command
+          target:
+            entity_id: openhasp.{{ device.name }}
+          data:
+            keyword: "output{{ relay.pin }} {{ "{{" }} '{\"state\":\"on\"}' if val == 1 else '{\"state\":\"off\"}' {{ "}}" }}"
+{% endfor %}
 {% endif %}

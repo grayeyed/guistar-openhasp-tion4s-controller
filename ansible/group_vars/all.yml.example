@@ -1,0 +1,85 @@
+# =============================================================================
+# Example Ansible variables file for OpenHASP
+# =============================================================================
+# This file contains all possible variables with neutral values
+# Copy and configure for your needs
+# =============================================================================
+
+# =============================================================================
+# OpenHASP device parameters (device-specific)
+# =============================================================================
+device:
+   name: "your_device_name"  # Device name (e.g., plate04, livingroom_panel)
+   ip: "your_device_ip"      # Device IP address for configuration upload
+
+# =============================================================================
+# Home Assistant entities (device-specific)
+# =============================================================================
+homeassistant:
+   # Required climate entity
+   climate_entity: "climate.your_climate_entity"
+
+  # Left upper corner (top to bottom)
+  leftcorner_line_one:
+    sensor: "sensor.temperature"
+    unit: "°C"
+    enabled: true
+  leftcorner_line_two:
+    sensor: "sensor.humidity"
+    unit: "%"
+    enabled: true
+  leftcorner_line_three:
+    sensor: "sensor.co2"
+    unit: "ppm"
+    enabled: true
+
+  # Right upper corner (top to bottom)
+  rightcorner_line_one:
+    sensor: "sensor.air_quality"
+    unit: "AQI"
+    enabled: true
+  rightcorner_line_two:
+    sensor: "sensor.power_consumption"
+    unit: "W"
+    enabled: true
+  rightcorner_line_three:
+    sensor: "sensor.filter_remaining"
+    unit: "d"
+    enabled: true
+
+  # Boost settings (optional)
+  boost_switch: "switch.your_boost_switch"
+  boost_time_sensor: "sensor.your_boost_time_left"
+  boost_time_number: "number.your_boost_time"
+  boost_enabled: true
+  boost_max_time: 60
+
+# =============================================================================
+# Home Assistant settings (common)
+# =============================================================================
+homeassistant:
+   api_url: "http://homeassistant.local:8123"  # HA URL
+   api_token: ""                                # Long-lived token (via -e or vault)
+   config_path: "/config"                       # HA config path
+   includes_path: "/config/includes/openhasp"   # Path for include files
+
+# =============================================================================
+# Deployment settings
+# =============================================================================
+deploy:
+   create_backup: true                    # Create backup before deployment
+   backup_path: "/config/backups/openhasp"  # Backup path
+   restart_ha: true                       # Restart HA after deployment
+
+# =============================================================================
+# HACS settings (optional)
+# =============================================================================
+hacs:
+   enabled: false         # Enable HACS installation
+   version: "2.0.5"       # HACS version to install
+   update: false          # Update existing HACS
+
+# =============================================================================
+# Path to generated files
+# =============================================================================
+generated_configs_path: "{{ playbook_dir }}/../output/generated-configs"

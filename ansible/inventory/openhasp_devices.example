@@ -1,0 +1,16 @@
+# =============================================================================
+# Example Inventory for OpenHASP devices
+# =============================================================================
+# Copy this file to openhasp_devices and configure for your needs.
+# Each device must have a corresponding file in host_vars/
+# =============================================================================
+
+[openhasp_devices]
+# device_name ansible_host=IP_ADDRESS (for automatic upload)
+plate01 ansible_host=192.168.1.100
+plate02 ansible_host=192.168.1.101
+
+[openhasp_devices:vars]
+# All tasks for OpenHASP devices are executed locally on the control node,
+# since devices do not support SSH. Interaction goes through HTTP API.
+ansible_connection=local

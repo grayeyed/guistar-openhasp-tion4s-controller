@@ -1,0 +1,4 @@
+---
+roles:
+  - name: jhampson-dbre.home_assistant.install_hacs
+    version: main

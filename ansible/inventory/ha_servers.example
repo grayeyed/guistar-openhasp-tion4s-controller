@@ -1,0 +1,13 @@
+# =============================================================================
+# Example Inventory for Home Assistant server
+# =============================================================================
+# Copy this file to ha_servers and configure for your needs.
+# =============================================================================
+
+[ha_servers]
+# hostname ansible_host=IP_OR_FQDN ansible_port=SSH_PORT ansible_connection=ssh ansible_user=root
+homeassistant.local ansible_host=192.168.1.10 ansible_port=22222 ansible_connection=ssh ansible_user=root
+
+[all:vars]
+# Common SSH arguments (e.g., to skip key verification)
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

@@ -1,0 +1,30 @@
+---
+# Deployment tasks for one device
+# Uses homeassistant.* and deploy.* variables
+
+- name: Determine device configs path
+  set_fact:
+    device_config_path: "{{ generated_configs_path }}/{{ target_device }}"
+
+- name: Create directory for includes
+  ansible.builtin.file:
+    path: "{{ homeassistant.includes_path }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Check for openhasp_homeassistant.yaml presence
+  ansible.builtin.stat:
+    path: "{{ device_config_path }}/{{ target_device }}_openhasp_homeassistant.yaml"
+  register: openhasp_config_file
+  delegate_to: localhost
+
+- name: Deploy openhasp_homeassistant.yaml
+  ansible.builtin.copy:
+    src: "{{ device_config_path }}/{{ target_device }}_openhasp_homeassistant.yaml"
+    dest: "{{ homeassistant.includes_path }}/{{ target_device }}.yaml"
+    mode: '0644'
+  become: true
+  when: openhasp_config_file.stat.exists
+  notify: Restart Home Assistant
+

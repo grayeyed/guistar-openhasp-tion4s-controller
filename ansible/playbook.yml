@@ -1,20 +1,114 @@
 ---
-- name: Generate OpenHASP configuration for ESP32-S3 Tion 4S
-  hosts: localhost
-  connection: local
+# =============================================================================
+# Ansible Playbook for OpenHASP
+# =============================================================================
+# This playbook performs:
+# 1. Generation of OpenHASP configurations for devices
+# 2. Deployment of configurations to Home Assistant via SSH
+# 3. Installation/update of HACS (optional)
+#
+# Usage:
+#   ansible-playbook playbook.yml -i inventory/openhasp_devices --tags generate
+#   ansible-playbook playbook.yml -i inventory/ha_servers -e "homeassistant.api_token=TOKEN"
+#
+# =============================================================================
+
+- name: Generate OpenHASP configuration for devices
+  hosts: openhasp_devices
   gather_facts: false
-  
-  vars_files:
-    - config/variables.yml
-  
+  tags: generate
+
   pre_tasks:
-    - name: Validate required variables
-      assert:
+    - name: Validate required variables for {{ inventory_hostname }}
+      ansible.builtin.assert:
         that:
           - device.name is defined
           - device.name != ""
-        fail_msg: "Обязательные переменные не определены"
-        success_msg: "Обязательные переменные присутствуют"
-  
+          - homeassistant.climate_entity is defined
+          - homeassistant.climate_entity != ""
+        fail_msg: "ERROR: Required variables are not defined for {{ inventory_hostname }}."
+      tags: always
+
+    - name: Create device output directory
+      ansible.builtin.file:
+        path: "{{ generated_configs_path }}/{{ device.name }}"
+        state: directory
+        mode: '0777'
+      tags: [generate, upload]
+
   roles:
     - openhasp-config
+
+- name: Deploy configuration to Home Assistant
+  hosts: ha_servers
+  gather_facts: true
+  tags: deploy
+
+  handlers:
+    - name: Restart Home Assistant
+      ansible.builtin.uri:
+        url: "{{ homeassistant.api_url }}/api/services/homeassistant/restart"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ homeassistant.api_token }}"
+          Content-Type: "application/json"
+        body: '{}'
+        body_format: json
+        status_code: 200
+      when: deploy.restart_ha | default(true)
+
+  tasks:
+    - name: Install HACS using community role
+      include_role:
+        name: home_assistant.install_hacs
+      vars:
+        ha_path: "{{ homeassistant.config_path }}"
+        install_hacs_requirements: false
+      when: hacs.enabled | default(false)
+
+    - name: Find all generated configurations
+      ansible.builtin.find:
+        paths: "{{ generated_configs_path }}"
+        file_type: directory
+        excludes: [".git", "__pycache__"]
+      register: found_devices
+      delegate_to: localhost
+      run_once: true
+
+    - name: Determine list of devices for deployment
+      set_fact:
+        devices_to_deploy: "{{ (groups.get('openhasp_devices', []) | intersect(ansible_play_hosts_all)) if (groups.get('openhasp_devices', []) | intersect(ansible_play_hosts_all) | length > 0) else (found_devices.files | map(attribute='path') | map('basename') | list) }}"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Deploy configurations for selected devices
+      include_tasks: deploy_device.yml
+      loop: "{{ devices_to_deploy }}"
+      loop_control:
+        loop_var: target_device
+
+    - name: Add openhasp include to configuration.yaml
+      ansible.builtin.lineinfile:
+        path: "{{ homeassistant.config_path }}/configuration.yaml"
+        regexp: "^openhasp:"
+        line: "openhasp: !include_dir_named includes/openhasp"
+        state: present
+      become: true
+      notify: Restart Home Assistant
+
+    - name: Create directory for includes
+      ansible.builtin.file:
+        path: "{{ homeassistant.includes_path }}"
+        state: directory
+        mode: '0755'
+      become: true
+
+
+# =============================================================================
+# Tags for controlling execution:
+#   --tags generate  - configuration generation only
+#   --tags upload    - page upload to devices only
+#   --tags deploy    - deployment to Home Assistant only
+#   --tags hacs      - HACS installation only
+#   --skip-tags hacs - skip HACS installation
+# =============================================================================

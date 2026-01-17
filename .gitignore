@@ -1,0 +1,22 @@
+# Ignore hidden files
+.*
+# But don't ignore .gitignore
+!.gitignore
+
+# Ignore markdown files by default
+*.md
+# But allow README and docs
+!README.md
+!docs/*.md
+/output
+
+# Ansible configuration and inventory
+/ansible/inventory/*
+!/ansible/inventory/*.example
+/ansible/host_vars/*
+!/ansible/host_vars/*.example
+/ansible/group_vars/*
+!/ansible/group_vars/*.example
+
+# Memory bank files
+memory-bank/
