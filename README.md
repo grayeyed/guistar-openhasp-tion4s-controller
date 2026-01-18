@@ -1,7 +1,7 @@
 # ESP32-S3 OpenHASP Tion 4S Controller
 
-Ansible playbook для конфигурирования тач-скрин устройства ESP32-S3, например, [GUISTAR ESP32-S3 с тремя релейными выходами](https://aliexpress.ru/item/1005006302251538.html?utm_campaign=1954_70513&utm_content=2&utm_medium=cpa&utm_source=aerkol&sku_id=12000039682095645) с прошивкой OpenHASP для управления бризером Tion 4S и другими устройствами через Home Assistant.
-
+Ansible playbook для конфигурирования тач-скрин устройства ESP32-S3, например, [GUISTAR ESP32-S3 с тремя релейными выходами](https://aliexpress.ru/item/1005006302251538.html?utm_campaign=1954_70513&utm_content=2&utm_medium=cpa&utm_source=aerkol&sku_id=12000039682095645) с прошивкой OpenHASP для управления бризером Tion 4S и другими устройствами через Home Assistant. Интеграция бризеров Tion с Home Assistant выполнена по методу, описанному в проекте [esphome-tion](https://github.com/dentra/esphome-tion) (Tion Breezers control and monitoring ESPHome custom firmware). Проект esphome-tion реализует низкоуровневое взаимодействие с оборудованием Tion (чтение датчиков, управление вентиляторами, режимами работы), в то время как этот проект создает пользовательский интерфейс на тачскрине OpenHASP для удобного управления. Вместе они образуют полную систему умного управления климатом в помещении. Страница, отображающая интерфейс управления встроенными реле опциональна. Кроме того, возможен вывод показаний других устройств Home Assistant в углах страниц (например, уровня CO2, температуры и влажности).
+ 
 ## Основные возможности
 - **Мульти-устройство**: Управление неограниченным количеством панелей OpenHASP.
 - **Автоматическая загрузка**: Загрузка разметки (`pages.jsonl`) на устройства через HTTP API.
